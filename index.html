@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -80,11 +80,16 @@
         <section class="habits-section">
           <div class="section-header">
             <h2>Tablero mensual</h2>
-            <button class="btn-primary" id="openRegisterModal">Registrar</button>
+            <button class="btn-primary" id="openRegisterModal">
+              Registrar
+            </button>
+            <button class="btn-primary" id="exportHabits">Exportar</button>
           </div>
 
           <div class="habits-table" id="habitsTable">
-            <p class="empty-state">No hay hábitos. Haz clic en "Crear Hábito" para comenzar.</p>
+            <p class="empty-state">
+              No hay hábitos. Haz clic en "Crear Hábito" para comenzar.
+            </p>
           </div>
         </section>
 
@@ -93,11 +98,15 @@
             <h2>🔥 Rachas actuales</h2>
           </div>
           <div class="streaks-container" id="streaksContainer">
-            <p class="empty-state">Las rachas aparecerán aquí cuando registres hábitos.</p>
+            <p class="empty-state">
+              Las rachas aparecerán aquí cuando registres hábitos.
+            </p>
           </div>
         </section>
 
-        <button class="btn-add-habit" id="openCreateModal">+ Crear Hábito</button>
+        <button class="btn-add-habit" id="openCreateModal">
+          + Crear Hábito
+        </button>
       </main>
 
       <footer class="footer">
@@ -117,12 +126,18 @@
       <div class="modal-content">
         <div class="modal-header">
           <h3>Crear Hábito</h3>
-          <button class="close-modal" data-modal="createHabitModal">&times;</button>
+          <button class="close-modal" data-modal="createHabitModal">
+            &times;
+          </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label for="habitName">Nombre del hábito</label>
-            <input type="text" id="habitName" placeholder="Ej: Hacer ejercicio" />
+            <input
+              type="text"
+              id="habitName"
+              placeholder="Ej: Hacer ejercicio"
+            />
           </div>
           <div class="form-group">
             <label for="habitFrequency">Frecuencia</label>
@@ -134,7 +149,9 @@
           <p class="info-text">Máximo 5 hábitos</p>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-modal="createHabitModal">Cancelar</button>
+          <button class="btn-secondary" data-modal="createHabitModal">
+            Cancelar
+          </button>
           <button class="btn-primary" id="createHabitBtn">Crear</button>
         </div>
       </div>
@@ -144,7 +161,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h3>Registrar Hábito</h3>
-          <button class="close-modal" data-modal="registerModal">&times;</button>
+          <button class="close-modal" data-modal="registerModal">
+            &times;
+          </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -159,7 +178,9 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-modal="registerModal">Cancelar</button>
+          <button class="btn-secondary" data-modal="registerModal">
+            Cancelar
+          </button>
           <button class="btn-primary" id="checkInBtn">Registrar</button>
         </div>
       </div>

@@ -3,42 +3,42 @@ const MAX_HABITS = 5;
 class DomainError extends Error {
   constructor(message, code) {
     super(message);
-    this.name = 'DomainError';
+    this.name = "DomainError";
     this.code = code;
   }
 }
 
 const ERROR_CODES = {
-  INVALID_NAME: 'INVALID_NAME',
-  INVALID_FREQUENCY: 'INVALID_FREQUENCY',
-  DUPLICATE_CHECKIN: 'DUPLICATE_CHECKIN',
-  INVALID_DATE: 'INVALID_DATE',
-  FUTURE_DATE: 'FUTURE_DATE',
-  INVALID_TARGET_MINUTES: 'INVALID_TARGET_MINUTES',
-  HABIT_NOT_FOUND: 'HABIT_NOT_FOUND',
+  INVALID_NAME: "INVALID_NAME",
+  INVALID_FREQUENCY: "INVALID_FREQUENCY",
+  DUPLICATE_CHECKIN: "DUPLICATE_CHECKIN",
+  INVALID_DATE: "INVALID_DATE",
+  FUTURE_DATE: "FUTURE_DATE",
+  INVALID_TARGET_MINUTES: "INVALID_TARGET_MINUTES",
+  HABIT_NOT_FOUND: "HABIT_NOT_FOUND",
 };
 
 const motivationalQuotes = [
-  'La fuerza no viene de la capacidad. Viene de la voluntad.',
-  'El éxito es la suma de pequeños esfuerzos repetidos día tras día.',
-  'No esperes. El momento nunca será perfecto.',
-  'El único modo de hacer un gran trabajo es amar lo que haces.',
-  'El futuro pertenece a quienes creen en la belleza de sus sueños.',
-  'Tu tiempo es limitado, no lo desperdicies viviendo la vida de otros.',
-  'El fracaso es la oportunidad de empezar de nuevo con más inteligencia.',
-  'No cuentes los días, haz que los días cuenten.',
-  'La disciplina es el puente entre metas y logros.',
-  'Pequeños pasos diarios llevan a grandes cambios.',
-  'La persistencia es el camino del éxito.',
-  'Hoy es el primer día del resto de tu vida.',
-  'El secreto para avanzar es empezar.',
-  'Cada día es una nueva oportunidad para ser mejor.',
-  'Los límites solo existen en tu mente.',
-  'La acción es la clave fundamental para todo éxito.',
-  'Transforma tus hábitos, transforma tu vida.',
-  'El progreso es progreso, no importa lo pequeño que sea.',
-  'La consistencia vence al talento.',
-  'Hoy es el mañana que esperabas ayer.',
+  "La fuerza no viene de la capacidad. Viene de la voluntad.",
+  "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
+  "No esperes. El momento nunca será perfecto.",
+  "El único modo de hacer un gran trabajo es amar lo que haces.",
+  "El futuro pertenece a quienes creen en la belleza de sus sueños.",
+  "Tu tiempo es limitado, no lo desperdicies viviendo la vida de otros.",
+  "El fracaso es la oportunidad de empezar de nuevo con más inteligencia.",
+  "No cuentes los días, haz que los días cuenten.",
+  "La disciplina es el puente entre metas y logros.",
+  "Pequeños pasos diarios llevan a grandes cambios.",
+  "La persistencia es el camino del éxito.",
+  "Hoy es el primer día del resto de tu vida.",
+  "El secreto para avanzar es empezar.",
+  "Cada día es una nueva oportunidad para ser mejor.",
+  "Los límites solo existen en tu mente.",
+  "La acción es la clave fundamental para todo éxito.",
+  "Transforma tus hábitos, transforma tu vida.",
+  "El progreso es progreso, no importa lo pequeño que sea.",
+  "La consistencia vence al talento.",
+  "Hoy es el mañana que esperabas ayer.",
 ];
 
 let dailyQuoteText = getRandomQuote();
@@ -47,7 +47,7 @@ class LogTracker {
   #dates = [];
 
   addLog(date) {
-    if (typeof date !== 'string' || date.length !== 10) {
+    if (typeof date !== "string" || date.length !== 10) {
       return null;
     }
     this.#dates.push(date);
@@ -95,7 +95,7 @@ class DailyStreakCalculator {
   }
 
   #getDateString(date) {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   }
 }
 
@@ -126,7 +126,7 @@ class WeeklyStreakCalculator {
   #groupByWeek(logs) {
     const weeks = {};
     logs.forEach((log) => {
-      const weekKey = this.#getWeekKey(new Date(log + 'T00:00:00'));
+      const weekKey = this.#getWeekKey(new Date(log + "T00:00:00"));
       if (!weeks[weekKey]) {
         weeks[weekKey] = [];
       }
@@ -138,7 +138,7 @@ class WeeklyStreakCalculator {
   #getWeekKey(date) {
     const year = date.getFullYear();
     const week = this.#getWeekNumber(date);
-    return `${year}-W${String(week).padStart(2, '0')}`;
+    return `${year}-W${String(week).padStart(2, "0")}`;
   }
 
   #getWeekNumber(date) {
@@ -151,7 +151,7 @@ class WeeklyStreakCalculator {
   }
 
   #getPreviousWeek(weekKey) {
-    const [year, weekStr] = weekKey.split('-W');
+    const [year, weekStr] = weekKey.split("-W");
     let week = parseInt(weekStr);
     let y = parseInt(year);
 
@@ -161,7 +161,7 @@ class WeeklyStreakCalculator {
       week = 52;
     }
 
-    return `${y}-W${String(week).padStart(2, '0')}`;
+    return `${y}-W${String(week).padStart(2, "0")}`;
   }
 }
 
@@ -202,14 +202,14 @@ class MonthlyStreakCalculator {
   }
 
   #getMonthKey(date) {
-    const d = typeof date === 'string' ? new Date(date) : date;
+    const d = typeof date === "string" ? new Date(date) : date;
     const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, "0");
     return `${year}-${month}`;
   }
 
   #getPreviousMonth(monthKey) {
-    const [year, month] = monthKey.split('-').map(Number);
+    const [year, month] = monthKey.split("-").map(Number);
     let prevYear = year;
     let prevMonth = month - 1;
 
@@ -218,7 +218,7 @@ class MonthlyStreakCalculator {
       prevMonth = 12;
     }
 
-    return `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+    return `${prevYear}-${String(prevMonth).padStart(2, "0")}`;
   }
 }
 
@@ -251,7 +251,7 @@ class Habit {
     const normalized = value.trim();
     if (normalized.length < 3) {
       throw new DomainError(
-        'El nombre del hábito debe tener al menos 3 caracteres.',
+        "El nombre del hábito debe tener al menos 3 caracteres.",
         ERROR_CODES.INVALID_NAME,
       );
     }
@@ -263,7 +263,7 @@ class Habit {
   }
 
   set frequency(value) {
-    const validFrequencies = ['daily', 'weekly', 'monthly'];
+    const validFrequencies = ["daily", "weekly", "monthly"];
     if (!validFrequencies.includes(value)) {
       throw new DomainError(
         'La frecuencia debe ser "daily", "weekly" o "monthly".',
@@ -289,21 +289,21 @@ class Habit {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(date)) {
       throw new DomainError(
-        'Fecha inválida. Formato esperado: YYYY-MM-DD',
+        "Fecha inválida. Formato esperado: YYYY-MM-DD",
         ERROR_CODES.INVALID_DATE,
       );
     }
 
-    const parsed = new Date(date + 'T00:00:00');
+    const parsed = new Date(date + "T00:00:00");
     if (isNaN(parsed.getTime())) {
-      throw new DomainError('La fecha no es válida.', ERROR_CODES.INVALID_DATE);
+      throw new DomainError("La fecha no es válida.", ERROR_CODES.INVALID_DATE);
     }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (parsed > today) {
       throw new DomainError(
-        'No se pueden registrar check-ins en fechas futuras.',
+        "No se pueden registrar check-ins en fechas futuras.",
         ERROR_CODES.FUTURE_DATE,
       );
     }
@@ -345,7 +345,7 @@ class Habit {
 
   toDisplayString() {
     const streak = this.calculateStreak();
-    const streakEmoji = streak > 0 ? ` 🔥 ${streak}` : '';
+    const streakEmoji = streak > 0 ? ` 🔥 ${streak}` : "";
     return `📌 ${this.name} (${this.frequency})${streakEmoji}`;
   }
 
@@ -364,15 +364,15 @@ class Habit {
   }
 
   static daily(name) {
-    return new Habit(name, 'daily');
+    return new Habit(name, "daily");
   }
 
   static weekly(name) {
-    return new Habit(name, 'weekly');
+    return new Habit(name, "weekly");
   }
 
   static monthly(name) {
-    return new Habit(name, 'monthly');
+    return new Habit(name, "monthly");
   }
 }
 
@@ -392,13 +392,13 @@ class TimedHabit extends Habit {
     const minutes = Number(value);
     if (isNaN(minutes) || minutes <= 0) {
       throw new DomainError(
-        'El objetivo de tiempo debe ser un número positivo.',
+        "El objetivo de tiempo debe ser un número positivo.",
         ERROR_CODES.INVALID_TARGET_MINUTES,
       );
     }
     if (minutes > 240) {
       throw new DomainError(
-        'El objetivo no puede superar 240 minutos (4 horas).',
+        "El objetivo no puede superar 240 minutos (4 horas).",
         ERROR_CODES.INVALID_TARGET_MINUTES,
       );
     }
@@ -407,20 +407,20 @@ class TimedHabit extends Habit {
 
   toDisplayString() {
     const streak = this.calculateStreak();
-    const streakEmoji = streak > 0 ? ` 🔥 ${streak}` : '';
+    const streakEmoji = streak > 0 ? ` 🔥 ${streak}` : "";
     return `📌 ${this.name} (${this.frequency}) ⏱️ ${this.#targetMinutes} min${streakEmoji}`;
   }
 
   static daily(name, targetMinutes) {
-    return new TimedHabit(name, 'daily', targetMinutes);
+    return new TimedHabit(name, "daily", targetMinutes);
   }
 
   static weekly(name, targetMinutes) {
-    return new TimedHabit(name, 'weekly', targetMinutes);
+    return new TimedHabit(name, "weekly", targetMinutes);
   }
 
   static monthly(name, targetMinutes) {
-    return new TimedHabit(name, 'monthly', targetMinutes);
+    return new TimedHabit(name, "monthly", targetMinutes);
   }
 }
 
@@ -463,7 +463,10 @@ class HabitService {
 
   createHabit(name, frequency) {
     if (!name || name.trim().length === 0) {
-      throw new DomainError('El nombre del hábito es obligatorio', ERROR_CODES.INVALID_NAME);
+      throw new DomainError(
+        "El nombre del hábito es obligatorio",
+        ERROR_CODES.INVALID_NAME,
+      );
     }
 
     const habit = new Habit(name.trim(), frequency);
@@ -475,7 +478,10 @@ class HabitService {
     const habit = this.#repository.getById(habitId);
 
     if (!habit) {
-      throw new DomainError('Hábito no encontrado', ERROR_CODES.HABIT_NOT_FOUND);
+      throw new DomainError(
+        "Hábito no encontrado",
+        ERROR_CODES.HABIT_NOT_FOUND,
+      );
     }
 
     return habit.registerCheckIn(date);
@@ -501,7 +507,7 @@ function addHabit(name, frequency) {
   const currentHabits = habitService.listHabits();
 
   if (currentHabits.length >= MAX_HABITS) {
-    showMessage('Has alcanzado el límite de 5 hábitos', 'error');
+    showMessage("Has alcanzado el límite de 5 hábitos", "error");
     return null;
   }
 
@@ -509,7 +515,7 @@ function addHabit(name, frequency) {
     const habit = habitService.createHabit(name, frequency);
     return habit;
   } catch (error) {
-    showMessage(error.message, 'error');
+    showMessage(error.message, "error");
     return null;
   }
 }
@@ -518,7 +524,7 @@ function logHabit(habitId, date) {
   try {
     return habitService.checkIn(habitId, date);
   } catch (error) {
-    showMessage(error.message, 'error');
+    showMessage(error.message, "error");
     return null;
   }
 }
@@ -535,9 +541,11 @@ function getStatistics() {
     habitCounts[habit.name] = logs.length;
   });
 
-  let mostActiveHabit = '-';
+  let mostActiveHabit = "-";
   if (totalCheckIns > 0) {
-    mostActiveHabit = Object.entries(habitCounts).sort((a, b) => b[1] - a[1])[0][0];
+    mostActiveHabit = Object.entries(habitCounts).sort(
+      (a, b) => b[1] - a[1],
+    )[0][0];
   }
 
   return {
@@ -547,13 +555,13 @@ function getStatistics() {
   };
 }
 
-function showMessage(message, type = 'success') {
-  const messageBox = document.getElementById('messageBox');
+function showMessage(message, type = "success") {
+  const messageBox = document.getElementById("messageBox");
   messageBox.textContent = message;
   messageBox.className = `message-box ${type}`;
 
   setTimeout(() => {
-    messageBox.classList.add('hidden');
+    messageBox.classList.add("hidden");
   }, 3000);
 }
 
@@ -565,28 +573,28 @@ function safeAction(action, onSuccess, onError) {
     }
     return result;
   } catch (error) {
-    let message = 'Error inesperado';
+    let message = "Error inesperado";
 
     if (error instanceof DomainError) {
       message = error.message;
       console.error(`[${error.code}] ${error.message}`);
     } else if (error instanceof Error) {
       message = error.message;
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
 
     if (onError) {
       onError(error);
     }
 
-    showMessage(message, 'error');
+    showMessage(message, "error");
     return null;
   }
 }
 
 function renderStreaks() {
   const habits = habitService.listHabits();
-  const streaksContainer = document.getElementById('streaksContainer');
+  const streaksContainer = document.getElementById("streaksContainer");
 
   if (habits.length === 0) {
     streaksContainer.innerHTML =
@@ -598,15 +606,15 @@ function renderStreaks() {
     .map((habit) => {
       const streak = habit.calculateStreak();
       const logs = habit.getLogs();
-      const frequencyText = habit.frequency === 'daily' ? 'días' : 'semanas';
-      const streakClass = streak > 0 ? 'streak-active' : 'streak-inactive';
+      const frequencyText = habit.frequency === "daily" ? "días" : "semanas";
+      const streakClass = streak > 0 ? "streak-active" : "streak-inactive";
 
       return `
         <div class="streak-card ${streakClass}">
           <div class="streak-header">
             <span class="streak-habit-name">${habit.name}</span>
             <span class="streak-frequency">${
-              habit.frequency === 'daily' ? 'Diario' : 'Semanal'
+              habit.frequency === "daily" ? "Diario" : "Semanal"
             }</span>
           </div>
           <div class="streak-body">
@@ -622,30 +630,30 @@ function renderStreaks() {
         </div>
       `;
     })
-    .join('');
+    .join("");
 
   streaksContainer.innerHTML = streakCards;
 }
 
 function renderHabits() {
   const habits = habitService.listHabits();
-  const habitsTable = document.getElementById('habitsTable');
-  const habitSelect = document.getElementById('habitSelect');
-  const createHabitBtn = document.getElementById('openCreateModal');
+  const habitsTable = document.getElementById("habitsTable");
+  const habitSelect = document.getElementById("habitSelect");
+  const createHabitBtn = document.getElementById("openCreateModal");
 
   if (habits.length === 0) {
     habitsTable.innerHTML =
       '<p class="empty-state">No hay hábitos. Haz clic en "Crear Hábito" para comenzar.</p>';
     habitSelect.innerHTML = '<option value="">Selecciona un hábito</option>';
-    createHabitBtn.style.display = 'block';
+    createHabitBtn.style.display = "block";
     renderStreaks();
     return;
   }
 
   if (habits.length >= MAX_HABITS) {
-    createHabitBtn.style.display = 'none';
+    createHabitBtn.style.display = "none";
   } else {
-    createHabitBtn.style.display = 'block';
+    createHabitBtn.style.display = "block";
   }
 
   const monthDays = getCurrentMonthDays();
@@ -653,14 +661,14 @@ function renderHabits() {
   const headerRow = `
     <div class="habit-row habit-header">
       <span class="habit-day-label">Día</span>
-      ${habits.map((habit) => `<span class="habit-name">${habit.name}</span>`).join('')}
+      ${habits.map((habit) => `<span class="habit-name">${habit.name}</span>`).join("")}
     </div>
   `;
 
   const dayRows = monthDays
     .map((date, index) => {
-      const dateObj = new Date(date + 'T00:00:00');
-      const dayLabel = String(dateObj.getDate()).padStart(2, '0');
+      const dateObj = new Date(date + "T00:00:00");
+      const dayLabel = String(dateObj.getDate()).padStart(2, "0");
 
       return `
         <div class="habit-row">
@@ -669,21 +677,23 @@ function renderHabits() {
             .map((habit) => {
               const habitLogs = habit.getLogs();
               const isChecked = habitLogs.includes(date);
-              return `<div class="habit-checkbox ${isChecked ? 'checked' : ''}" 
+              return `<div class="habit-checkbox ${isChecked ? "checked" : ""}" 
                          data-habit-id="${habit.id}" 
                          data-date="${date}"></div>`;
             })
-            .join('')}
+            .join("")}
         </div>
       `;
     })
-    .join('');
+    .join("");
 
   habitsTable.innerHTML = headerRow + dayRows;
 
   habitSelect.innerHTML =
     '<option value="">Selecciona un hábito</option>' +
-    habits.map((habit) => `<option value="${habit.id}">${habit.name}</option>`).join('');
+    habits
+      .map((habit) => `<option value="${habit.id}">${habit.name}</option>`)
+      .join("");
 
   attachCheckboxListeners();
   renderStreaks();
@@ -698,28 +708,28 @@ function getCurrentMonthDays() {
 
   for (let day = 1; day <= currentDay; day++) {
     const date = new Date(year, month, day);
-    dates.push(date.toISOString().split('T')[0]);
+    dates.push(date.toISOString().split("T")[0]);
   }
 
   return dates;
 }
 
 function attachCheckboxListeners() {
-  document.querySelectorAll('.habit-checkbox').forEach((checkbox) => {
-    checkbox.addEventListener('click', function () {
+  document.querySelectorAll(".habit-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("click", function () {
       const habitId = parseInt(this.dataset.habitId);
       const date = this.dataset.date;
 
-      if (this.classList.contains('checked')) {
+      if (this.classList.contains("checked")) {
         removeLog(habitId, date);
-        this.classList.remove('checked');
-        showMessage('Check-in removido', 'success');
+        this.classList.remove("checked");
+        showMessage("Check-in removido", "success");
         renderStreaks();
       } else {
         const log = logHabit(habitId, date);
         if (log) {
-          this.classList.add('checked');
-          showMessage('Check-in registrado', 'success');
+          this.classList.add("checked");
+          showMessage("Check-in registrado", "success");
           renderStreaks();
         }
       }
@@ -736,25 +746,33 @@ function removeLog(habitId, date) {
 
 function updateDateTime() {
   const now = new Date();
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const days = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
   const months = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
 
-  document.getElementById('dayNumber').textContent = now.getDate();
-  document.getElementById('monthName').textContent = months[now.getMonth()];
-  document.getElementById('dayName').textContent = days[now.getDay()];
+  document.getElementById("dayNumber").textContent = now.getDate();
+  document.getElementById("monthName").textContent = months[now.getMonth()];
+  document.getElementById("dayName").textContent = days[now.getDay()];
 }
 
 function getRandomQuote() {
@@ -763,46 +781,75 @@ function getRandomQuote() {
 }
 
 function renderQuote() {
-  const savedQuote = document.getElementById('savedQuote');
-  savedQuote.textContent = dailyQuoteText || 'Escribe tu frase del día...';
+  const savedQuote = document.getElementById("savedQuote");
+  savedQuote.textContent = dailyQuoteText || "Escribe tu frase del día...";
 }
 
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.add('active');
+    modal.classList.add("active");
   }
 }
 
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.remove('active');
+    modal.classList.remove("active");
   }
 }
 
 function setupModalListeners() {
-  document.getElementById('openCreateModal').addEventListener('click', () => {
-    openModal('createHabitModal');
+  document.getElementById("openCreateModal").addEventListener("click", () => {
+    openModal("createHabitModal");
   });
 
-  document.getElementById('openRegisterModal').addEventListener('click', () => {
+  function exportHabitsToCSV() {
+    console.log("exportando a csv...");
+    const habits = habitService.listHabits();
+    const rows = habits
+      .map((habit) => {
+        return {
+          name: habit.name,
+          frequency: habit.frequency,
+          count: habit.getLogs().length,
+        };
+      })
+      .map((row) => `"${row.name}",${row.frequency},${row.count}`);
+    const rowsWithHeader = [
+      `"Nombre del hábito", Frecuencia, Conteo`,
+      ...rows,
+    ].join("\n");
+    console.log(rowsWithHeader);
+
+    const blob = new Blob([rowsWithHeader], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "habits.csv";
+    anchor.click();
+  }
+  document.getElementById("openRegisterModal").addEventListener("click", () => {
     const habits = habitService.listHabits();
     if (habits.length === 0) {
-      showMessage('Primero crea un hábito', 'error');
+      showMessage("Primero crea un hábito", "error");
       return;
     }
-    openModal('registerModal');
+    openModal("registerModal");
   });
 
-  document.querySelectorAll('.close-modal').forEach((btn) => {
-    btn.addEventListener('click', function () {
+  document.getElementById("exportHabits").addEventListener("click", () => {
+    exportHabitsToCSV();
+  });
+
+  document.querySelectorAll(".close-modal").forEach((btn) => {
+    btn.addEventListener("click", function () {
       closeModal(this.dataset.modal);
     });
   });
 
-  document.querySelectorAll('.btn-secondary').forEach((btn) => {
-    btn.addEventListener('click', function () {
+  document.querySelectorAll(".btn-secondary").forEach((btn) => {
+    btn.addEventListener("click", function () {
       const modalId = this.dataset.modal;
       if (modalId) {
         closeModal(modalId);
@@ -810,59 +857,62 @@ function setupModalListeners() {
     });
   });
 
-  document.querySelectorAll('.modal').forEach((modal) => {
-    modal.addEventListener('click', function (e) {
+  document.querySelectorAll(".modal").forEach((modal) => {
+    modal.addEventListener("click", function (e) {
       if (e.target === this) {
-        this.classList.remove('active');
+        this.classList.remove("active");
       }
     });
   });
 }
 
 function initApp() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('checkInDate').value = today;
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("checkInDate").value = today;
 
   updateDateTime();
   setupModalListeners();
 
-  document.getElementById('createHabitBtn').addEventListener('click', () => {
-    const name = document.getElementById('habitName').value;
-    const frequency = document.getElementById('habitFrequency').value;
+  document.getElementById("createHabitBtn").addEventListener("click", () => {
+    const name = document.getElementById("habitName").value;
+    const frequency = document.getElementById("habitFrequency").value;
 
     safeAction(
       () => addHabit(name, frequency),
       (habit) => {
         if (habit) {
-          showMessage(`Hábito "${habit.name}" creado exitosamente`, 'success');
-          document.getElementById('habitName').value = '';
+          showMessage(`Hábito "${habit.name}" creado exitosamente`, "success");
+          document.getElementById("habitName").value = "";
           renderHabits();
-          closeModal('createHabitModal');
+          closeModal("createHabitModal");
 
           const currentHabits = habitService.listHabits();
           if (currentHabits.length >= MAX_HABITS) {
-            showMessage('Has alcanzado el límite máximo de 5 hábitos', 'success');
+            showMessage(
+              "Has alcanzado el límite máximo de 5 hábitos",
+              "success",
+            );
           }
         }
       },
     );
   });
 
-  document.getElementById('checkInBtn').addEventListener('click', () => {
-    const habitId = parseInt(document.getElementById('habitSelect').value);
-    const date = document.getElementById('checkInDate').value;
+  document.getElementById("checkInBtn").addEventListener("click", () => {
+    const habitId = parseInt(document.getElementById("habitSelect").value);
+    const date = document.getElementById("checkInDate").value;
 
     if (!habitId || !date) {
-      showMessage('Selecciona un hábito y una fecha', 'error');
+      showMessage("Selecciona un hábito y una fecha", "error");
       return;
     }
 
     const log = logHabit(habitId, date);
     if (log) {
       const habit = habitService.getHabitById(habitId);
-      showMessage(`Check-in registrado para ${habit.name}`, 'success');
+      showMessage(`Check-in registrado para ${habit.name}`, "success");
       renderHabits();
-      closeModal('registerModal');
+      closeModal("registerModal");
     }
   });
 
@@ -870,4 +920,4 @@ function initApp() {
   renderQuote();
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener("DOMContentLoaded", initApp);
