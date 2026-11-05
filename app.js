@@ -46,6 +46,10 @@ let dailyQuoteText = getRandomQuote();
 class LogTracker {
   #dates = [];
 
+  constructor(initialLogs = []) {
+    this.#dates = [...initialLogs];
+  }
+
   addLog(date) {
     if (typeof date !== "string" || date.length !== 10) {
       return null;
@@ -235,12 +239,16 @@ class Habit {
   #tracker;
   #createdAt;
 
-  constructor(name, frequency) {
-    this.#id = Habit.createId();
+  constructor(
+    name,
+    frequency,
+    { id = null, createdAt = null, logs = [] } = {},
+  ) {
+    this.#id = id ?? Habit.createId();
     this.name = name;
     this.frequency = frequency;
-    this.#createdAt = new Date().toISOString();
-    this.#tracker = new LogTracker();
+    this.#createdAt = createdAt ?? new Date().toISOString();
+    this.#tracker = new LogTracker(logs);
   }
 
   get name() {
@@ -374,6 +382,23 @@ class Habit {
   static monthly(name) {
     return new Habit(name, "monthly");
   }
+  toJSON() {
+    return {
+      id: this.#id,
+      name: this.#name,
+      frequency: this.#frequency,
+      createdAt: this.#createdAt,
+      logs: this.getLogs(),
+    };
+  }
+
+  static fromJSON(data) {
+    return new Habit(data.name, data.frequency, {
+      id: data.id,
+      createdAt: data.createdAt,
+      logs: data.logs || [],
+    });
+  }
 }
 
 class TimedHabit extends Habit {
@@ -428,6 +453,8 @@ class InMemoryHabitRepository {
   #habits = [];
 
   save(habit) {
+    console.log("en memoria");
+
     const index = this.#habits.findIndex((h) => h.id === habit.id);
     if (index !== -1) {
       this.#habits[index] = habit;
@@ -448,6 +475,70 @@ class InMemoryHabitRepository {
     const index = this.#habits.findIndex((h) => h.id === id);
     if (index !== -1) {
       this.#habits.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+}
+
+class LocalStorageHabitRepository {
+  #storageKey;
+  #habitsMap = new Map();
+  #habitsIds = []; // 1,2,3,4,5
+
+  constructor(storageKey = "habits") {
+    this.#storageKey = storageKey;
+    this.#loadFromStorage();
+  }
+
+  #loadFromStorage() {
+    try {
+      const data = localStorage.getItem(this.#storageKey);
+      if (data) {
+        const parsed = JSON.parse(data);
+        parsed.forEach((item) => {
+          this.#habitsMap.set(item.id, Habit.fromJSON(item));
+          console.log(item, Habit.fromJSON(item));
+        });
+        this.#habitsIds = Array.from(this.#habitsMap.keys());
+      }
+    } catch (error) {
+      console.error("Error loading habits from localStorage:", error);
+      this.#habitsMap.clear();
+    }
+  }
+
+  #saveToStorage() {
+    try {
+      const data = Array.from(this.#habitsMap.values()).map((habit) =>
+        habit.toJSON(),
+      );
+      localStorage.setItem(this.#storageKey, JSON.stringify(data));
+    } catch (error) {
+      console.error("Error saving habits to localStorage:", error);
+    }
+  }
+
+  save(habit) {
+    this.#habitsMap.set(habit.id, habit);
+    if (!this.#habitsIds.includes(habit.id)) this.#habitsIds.push(habit.id);
+    this.#saveToStorage();
+  }
+
+  getById(id) {
+    return this.#habitsMap.get(id) || null;
+  }
+
+  list() {
+    return this.#habitsIds.map((id) => this.#habitsMap.get(id));
+  }
+
+  delete(id) {
+    const hasHabit = this.#habitsMap.has(id);
+    if (hasHabit) {
+      this.#habitsMap.delete(id);
+      this.#habitsIds = this.#habitsIds.filter((id) => id !== id);
+      this.#saveToStorage();
       return true;
     }
     return false;
@@ -485,8 +576,26 @@ class HabitService {
         ERROR_CODES.HABIT_NOT_FOUND,
       );
     }
+    console.log("registro");
 
-    return habit.registerCheckIn(date);
+    const result = habit.registerCheckIn(date);
+    this.#repository.save(habit);
+    return result;
+  }
+
+  removeCheckIn(habitId, date) {
+    const habit = this.#repository.getById(habitId);
+
+    if (!habit) {
+      throw new DomainError(
+        "Hábito no encontrado",
+        ERROR_CODES.HABIT_NOT_FOUND,
+      );
+    }
+
+    const result = habit.removeCheckIn(date);
+    this.#repository.save(habit);
+    return result;
   }
 
   listHabits() {
@@ -595,11 +704,12 @@ class FilterState {
 }
 
 const filterState = new FilterState();
-const habitRepository = new InMemoryHabitRepository();
+// Cambiar entre implementaciones fácilmente:
+// const habitRepository = new InMemoryHabitRepository();
+const habitRepository = new LocalStorageHabitRepository("habits");
 const habitService = new HabitService(habitRepository, filterState);
 
 filterState.subscribe((filters) => {
-  console.log("filters", filters);
   renderHabits();
 });
 
@@ -701,7 +811,6 @@ function renderStreaks() {
       '<p class="empty-state">Las rachas aparecerán aquí cuando registres hábitos.</p>';
     return;
   }
-
   const streakCards = habits
     .map((habit) => {
       const streak = habit.calculateStreak();
@@ -740,7 +849,6 @@ function renderHabits() {
   const habitsTable = document.getElementById("habitsTable");
   const habitSelect = document.getElementById("habitSelect");
   const createHabitBtn = document.getElementById("openCreateModal");
-  console.log("los hábitos", habits);
   if (habits.length === 0) {
     habitsTable.innerHTML =
       '<p class="empty-state">No hay hábitos. Haz clic en "Crear Hábito" para comenzar.</p>';
@@ -932,7 +1040,6 @@ function setupModalListeners() {
       `"Nombre del hábito", Frecuencia, Conteo`,
       ...rows,
     ].join("\n");
-    console.log(rowsWithHeader);
 
     const blob = new Blob([rowsWithHeader], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -956,23 +1063,9 @@ function setupModalListeners() {
 
   document.getElementById("filterForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    console.log("Vamos a filtrar");
     const form = new FormData(e.target);
     const values = Object.fromEntries(form);
-    console.log(values);
 
-    // const habits = habitService.listHabits();
-    // const filteredHabits = habits.filter((habit) => {
-    //   return (
-    //     (values["filterBy"] !== "all"
-    //       ? habit.frequency === values["filterBy"]
-    //       : true) &&
-    //     (values["filterDate"] !== ""
-    //       ? habit.getLogs().includes(values["filterDate"])
-    //       : true)
-    //   );
-    // });
-    // console.log(filteredHabits);
     filterState.setFilters(Object.fromEntries(form));
     closeModal("filterModal");
   });
@@ -1050,13 +1143,14 @@ function initApp() {
       closeModal("registerModal");
     }
   });
-  const h1 = addHabit("diario", "daily");
-  const h2 = addHabit("semanal", "weekly");
-  logHabit(h1.id, "2026-11-04");
-  logHabit(h2.id, "2026-11-03");
+  // const h1 = addHabit("diario", "daily");
+  // const h2 = addHabit("semanal", "weekly");
+  // logHabit(h1.id, "2026-11-04");
+  // logHabit(h2.id, "2026-11-03");
 
   renderHabits();
   renderQuote();
+  renderStreaks();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
