@@ -788,20 +788,32 @@ function renderQuote() {
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.add("active");
+    if (modal instanceof HTMLDialogElement) {
+      modal.showModal();
+    } else {
+      modal.classList.add("active");
+    }
   }
 }
 
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
-    modal.classList.remove("active");
+    if (modal instanceof HTMLDialogElement) {
+      modal.close();
+    } else {
+      modal.classList.remove("active");
+    }
   }
 }
 
 function setupModalListeners() {
   document.getElementById("openCreateModal").addEventListener("click", () => {
     openModal("createHabitModal");
+  });
+
+  document.getElementById("filtertHabits").addEventListener("click", () => {
+    openModal("filterModal");
   });
 
   function exportHabitsToCSV() {
@@ -842,6 +854,34 @@ function setupModalListeners() {
     exportHabitsToCSV();
   });
 
+  document.getElementById("filterForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    console.log("Vamos a filtrar");
+    const form = new FormData(e.target);
+    const values = Object.fromEntries(form);
+    console.log(values);
+    // {
+    //     "filterBy": "daily",
+    //     "filterDate": "2026-11-13"
+    // }
+    const habits = habitService.listHabits();
+    const filteredHabits = habits.filter((habit) => {
+      console.log(habit, habit.getLogs());
+
+      return (
+        (values["filterBy"] !== "all"
+          ? habit.frequency === values["filterBy"]
+          : true) &&
+        (values["filterDate"] !== ""
+          ? habit.getLogs().includes(values["filterDate"])
+          : true)
+      );
+    });
+    console.log(filteredHabits);
+
+    closeModal("filterModal");
+  });
+
   document.querySelectorAll(".close-modal").forEach((btn) => {
     btn.addEventListener("click", function () {
       closeModal(this.dataset.modal);
@@ -860,7 +900,7 @@ function setupModalListeners() {
   document.querySelectorAll(".modal").forEach((modal) => {
     modal.addEventListener("click", function (e) {
       if (e.target === this) {
-        this.classList.remove("active");
+        closeModal(this.id);
       }
     });
   });
@@ -915,6 +955,10 @@ function initApp() {
       closeModal("registerModal");
     }
   });
+  const h1 = addHabit("diario", "daily");
+  const h2 = addHabit("semanal", "weekly");
+  logHabit(h1.id, "2026-11-04");
+  logHabit(h2.id, "2026-11-03");
 
   renderHabits();
   renderQuote();

@@ -287,6 +287,21 @@ footer {
   display: flex;
 }
 
+dialog.modal {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+dialog.modal[open] {
+  display: flex;
+}
+
+dialog.modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .modal-content {
   background: white;
   border-radius: 12px;
