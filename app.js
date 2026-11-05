@@ -456,9 +456,11 @@ class InMemoryHabitRepository {
 
 class HabitService {
   #repository;
+  #filterState;
 
-  constructor(repository) {
+  constructor(repository, filterState) {
     this.#repository = repository;
+    this.#filterState = filterState;
   }
 
   createHabit(name, frequency) {
@@ -491,6 +493,51 @@ class HabitService {
     return this.#repository.list();
   }
 
+  listFilterHabits() {
+    const habits = this.#repository.list();
+    return this.#applyFilters(habits, this.#filterState.filters);
+  }
+
+  #applyFilters(habits, filters) {
+    return habits.filter((habit) => {
+      // Filtro por frecuencia
+      if (
+        filters.frequency !== "all" &&
+        habit.frequency !== filters.frequency
+      ) {
+        return false;
+      }
+
+      // Filtro por estado de racha
+      const streak = habit.calculateStreak();
+      if (filters.streakStatus === "active" && streak === 0) {
+        return false;
+      }
+      if (filters.streakStatus === "inactive" && streak > 0) {
+        return false;
+      }
+
+      // Filtro por racha mínima
+      if (streak < filters.minStreak) {
+        return false;
+      }
+
+      // Filtro por búsqueda
+      if (
+        filters.search &&
+        !habit.name.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  getFilterState() {
+    return this.#filterState;
+  }
+
   getHabitById(habitId) {
     return this.#repository.getById(habitId);
   }
@@ -500,8 +547,61 @@ class HabitService {
   }
 }
 
+class FilterState {
+  #filters = {
+    frequency: "all",
+    streakStatus: "all",
+    minStreak: 0,
+    search: "",
+  };
+
+  #observers = [];
+
+  get filters() {
+    return { ...this.#filters };
+  }
+
+  setFilter(key, value) {
+    this.#filters[key] = value;
+    this.notify();
+  }
+
+  setFilters(newFilters) {
+    this.#filters = { ...this.#filters, ...newFilters };
+    this.notify();
+  }
+
+  reset() {
+    this.#filters = {
+      frequency: "all",
+      streakStatus: "all",
+      minStreak: 0,
+      search: "",
+    };
+    this.notify();
+  }
+
+  subscribe(observerFn) {
+    this.#observers.push(observerFn);
+  }
+
+  unsubscribe(observerFn) {
+    this.#observers = this.#observers.filter((o) => o !== observerFn);
+  }
+
+  notify() {
+    this.#observers.forEach((observerFn) => observerFn(this.#filters));
+  }
+}
+
+const filterState = new FilterState();
 const habitRepository = new InMemoryHabitRepository();
-const habitService = new HabitService(habitRepository);
+const habitService = new HabitService(habitRepository, filterState);
+
+filterState.subscribe((filters) => {
+  console.log("filters", filters);
+  renderHabits();
+});
 
 function addHabit(name, frequency) {
   const currentHabits = habitService.listHabits();
@@ -636,11 +736,11 @@ function renderStreaks() {
 }
 
 function renderHabits() {
-  const habits = habitService.listHabits();
+  const habits = habitService.listFilterHabits();
   const habitsTable = document.getElementById("habitsTable");
   const habitSelect = document.getElementById("habitSelect");
   const createHabitBtn = document.getElementById("openCreateModal");
-
+  console.log("los hábitos", habits);
   if (habits.length === 0) {
     habitsTable.innerHTML =
       '<p class="empty-state">No hay hábitos. Haz clic en "Crear Hábito" para comenzar.</p>';
@@ -860,25 +960,20 @@ function setupModalListeners() {
     const form = new FormData(e.target);
     const values = Object.fromEntries(form);
     console.log(values);
-    // {
-    //     "filterBy": "daily",
-    //     "filterDate": "2026-11-13"
-    // }
-    const habits = habitService.listHabits();
-    const filteredHabits = habits.filter((habit) => {
-      console.log(habit, habit.getLogs());
 
-      return (
-        (values["filterBy"] !== "all"
-          ? habit.frequency === values["filterBy"]
-          : true) &&
-        (values["filterDate"] !== ""
-          ? habit.getLogs().includes(values["filterDate"])
-          : true)
-      );
-    });
-    console.log(filteredHabits);
-
+    // const habits = habitService.listHabits();
+    // const filteredHabits = habits.filter((habit) => {
+    //   return (
+    //     (values["filterBy"] !== "all"
+    //       ? habit.frequency === values["filterBy"]
+    //       : true) &&
+    //     (values["filterDate"] !== ""
+    //       ? habit.getLogs().includes(values["filterDate"])
+    //       : true)
+    //   );
+    // });
+    // console.log(filteredHabits);
+    filterState.setFilters(Object.fromEntries(form));
     closeModal("filterModal");
   });
 

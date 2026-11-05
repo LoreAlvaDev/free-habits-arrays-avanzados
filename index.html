@@ -199,18 +199,31 @@
           <button class="close-modal" data-modal="filterModal">&times;</button>
         </div>
         <div class="modal-body">
+          <p>Filtrar por</p>
           <form id="filterForm">
             <div class="form-group">
-              <label for="filterBy">Filtrar por</label>
-              <select id="filterBy" name="filterBy">
+              <label for="frequency">Frecuencia</label>
+              <select id="frequency" name="frequency">
                 <option value="all">Todos</option>
                 <option value="daily">Diario</option>
                 <option value="weekly">Semanal</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="filterDate">Fecha</label>
-              <input type="date" name="filterDate" id="filterDate" />
+              <label for="streakStatus">Estado de racha</label>
+              <select id="streakStatus" name="streakStatus">
+                <option value="all">Todos</option>
+                <option value="active">Racha activa</option>
+                <option value="inactive">Sin racha</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="minStreak">Racha mínima</label>
+              <input type="number" name="minStreak" id="minStreak" />
+            </div>
+            <div class="form-group">
+              <label for="search">Texto</label>
+              <input type="text" name="search" id="search" />
             </div>
           </form>
         </div>
