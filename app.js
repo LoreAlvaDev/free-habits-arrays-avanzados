@@ -498,7 +498,7 @@ class LocalStorageHabitRepository {
         const parsed = JSON.parse(data);
         parsed.forEach((item) => {
           this.#habitsMap.set(item.id, Habit.fromJSON(item));
-          console.log(item, Habit.fromJSON(item).getLogs());
+          // console.log(item, Habit.fromJSON(item).getLogs());
         });
         this.#habitsIds = Array.from(this.#habitsMap.keys());
       }
@@ -712,6 +712,7 @@ const habitService = new HabitService(habitRepository, filterState);
 
 filterState.subscribe((filters) => {
   renderHabits();
+  renderDashboarStats();
 });
 
 function addHabit(name, frequency) {
@@ -906,6 +907,63 @@ function renderHabits() {
 
   attachCheckboxListeners();
   renderStreaks();
+}
+
+function getDashboardStats() {
+  const habits = habitService.listFilterHabits();
+  const initValue = {
+    totalHabits: 0,
+    totalCheckIns: 0,
+    totalStreak: 0,
+    maxStreak: 0,
+    activeHabits: 0,
+  };
+  return habits.reduce((acc, habit) => {
+    const logs = habit.getLogs();
+    const streak = habit.calculateStreak();
+    const isActive = streak > 0;
+    acc.totalHabits++;
+    acc.totalCheckIns += logs.length;
+    acc.totalStreak += streak;
+    acc.maxStreak = Math.max(streak, acc.maxStreak);
+    acc.activeHabits += isActive ? 1 : 0;
+    return acc;
+  }, initValue);
+}
+
+function renderDashboarStats() {
+  const stats = getDashboardStats();
+  const container = document.getElementById("statsDashboard");
+
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="stat-card">
+        <span class="stat-emoji">📝</span>
+        <span class="stat-value">${stats.totalHabits}</span>
+        <span class="stat-label">Hábitos</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-emoji">✅</span>
+        <span class="stat-value">${stats.totalCheckIns}</span>
+        <span class="stat-label">Check-ins</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-emoji">🔥</span>
+        <span class="stat-value">${stats.totalStreak}</span>
+        <span class="stat-label">Racha Total</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-emoji">🏆</span>
+        <span class="stat-value">${stats.maxStreak}</span>
+        <span class="stat-label">Racha Máx</span>
+    </div>
+     <div class="stat-card">
+        <span class="stat-emoji">⚡</span>
+        <span class="stat-value">${stats.activeHabits}</span>
+        <span class="stat-label">Activos</span>
+    </div>
+  `;
 }
 
 function getCurrentMonthDays() {
@@ -1115,6 +1173,7 @@ function initApp() {
           showMessage(`Hábito "${habit.name}" creado exitosamente`, "success");
           document.getElementById("habitName").value = "";
           renderHabits();
+          renderDashboarStats();
           closeModal("createHabitModal");
 
           const currentHabits = habitService.listHabits();
@@ -1153,7 +1212,8 @@ function initApp() {
 
   renderHabits();
   renderQuote();
-  renderStreaks();
+  // renderStreaks();
+  renderDashboarStats();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
