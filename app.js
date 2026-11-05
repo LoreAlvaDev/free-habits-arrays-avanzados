@@ -498,7 +498,7 @@ class LocalStorageHabitRepository {
         const parsed = JSON.parse(data);
         parsed.forEach((item) => {
           this.#habitsMap.set(item.id, Habit.fromJSON(item));
-          console.log(item, Habit.fromJSON(item));
+          console.log(item, Habit.fromJSON(item).getLogs());
         });
         this.#habitsIds = Array.from(this.#habitsMap.keys());
       }
@@ -585,6 +585,7 @@ class HabitService {
 
   removeCheckIn(habitId, date) {
     const habit = this.#repository.getById(habitId);
+    console.log("lo quita");
 
     if (!habit) {
       throw new DomainError(
@@ -929,10 +930,12 @@ function attachCheckboxListeners() {
       const date = this.dataset.date;
 
       if (this.classList.contains("checked")) {
-        removeLog(habitId, date);
-        this.classList.remove("checked");
-        showMessage("Check-in removido", "success");
-        renderStreaks();
+        const log = habitService.removeCheckIn(habitId, date);
+        if (log) {
+          this.classList.remove("checked");
+          showMessage("Check-in removido", "success");
+          renderStreaks();
+        }
       } else {
         const log = logHabit(habitId, date);
         if (log) {
