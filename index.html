@@ -118,6 +118,14 @@
             </p>
           </div>
         </section>
+        <section class="chart-section">
+          <div class="section-header">
+            <h2>📊 Check-ins por día</h2>
+          </div>
+          <div class="chart-container">
+            <canvas id="checkInsByDayChart"></canvas>
+          </div>
+        </section>
 
         <button class="btn-add-habit" id="openCreateModal">
           + Crear Hábito
@@ -253,5 +261,6 @@
     <div id="messageBox" class="message-box hidden"></div>
 
     <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </body>
 </html>

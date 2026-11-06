@@ -712,6 +712,7 @@ const habitService = new HabitService(habitRepository, filterState);
 
 filterState.subscribe((filters) => {
   renderHabits();
+  renderCheckInsByDayOfWeek();
   renderDashboarStats();
 });
 
@@ -856,7 +857,8 @@ function renderHabits() {
       '<p class="empty-state">No hay hábitos. Haz clic en "Crear Hábito" para comenzar.</p>';
     habitSelect.innerHTML = '<option value="">Selecciona un hábito</option>';
     createHabitBtn.style.display = "block";
-    renderStreaks();
+    renderCheckInsByDayOfWeek();
+    renderDashboarStats();
     return;
   }
 
@@ -906,6 +908,8 @@ function renderHabits() {
       .join("");
 
   attachCheckboxListeners();
+  renderCheckInsByDayOfWeek();
+  renderDashboarStats();
   renderStreaks();
 }
 
@@ -929,6 +933,96 @@ function getDashboardStats() {
     acc.activeHabits += isActive ? 1 : 0;
     return acc;
   }, initValue);
+}
+
+function getCheckInsByDayOfWeek() {
+  const habits = habitService.listHabits();
+  const daysOfWeek = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+  ];
+  const allLogs = habits.flatMap((habit) => habit.getLogs());
+  // Output: { Lunes: 12, Martes: 10, Miércoles: 8, Jueves: 15, Viernes: 10, Sábado: 5, Domingo: 12 }
+  const checkInsByDay = daysOfWeek.reduce((acc, day) => {
+    acc[day] = allLogs.filter(
+      (log) => new Date(log).getDay() === daysOfWeek.indexOf(day),
+    ).length;
+    return acc;
+  }, {});
+  return checkInsByDay;
+}
+
+let chartId;
+
+function renderCheckInsByDayOfWeek() {
+  console.log("voy a pintar");
+
+  const checkInsByDay = getCheckInsByDayOfWeek();
+  const ctx = document.getElementById("checkInsByDayChart");
+
+  if (!ctx) return;
+  if (chartId) chartId.destroy();
+
+  const labels = Object.keys(checkInsByDay); // Output: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+  const data = Object.values(checkInsByDay); // Output: [12, 10, 8, 15, 10, 5, 12]
+  console.log(data);
+
+  chartId = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Check-ins",
+          data: data,
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(255, 159, 64, 0.7)",
+            "rgba(255, 205, 86, 0.7)",
+            "rgba(75, 192, 192, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(153, 102, 255, 0.7)",
+            "rgba(201, 203, 207, 0.7)",
+          ],
+          borderColor: [
+            "rgb(255, 99, 132)",
+            "rgb(255, 159, 64)",
+            "rgb(255, 205, 86)",
+            "rgb(75, 192, 192)",
+            "rgb(54, 162, 235)",
+            "rgb(153, 102, 255)",
+            "rgb(201, 203, 207)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: false,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+          },
+        },
+      },
+    },
+  });
 }
 
 function renderDashboarStats() {
@@ -992,6 +1086,7 @@ function attachCheckboxListeners() {
         if (log) {
           this.classList.remove("checked");
           showMessage("Check-in removido", "success");
+          renderCheckInsByDayOfWeek();
           renderStreaks();
         }
       } else {
@@ -999,6 +1094,7 @@ function attachCheckboxListeners() {
         if (log) {
           this.classList.add("checked");
           showMessage("Check-in registrado", "success");
+          renderCheckInsByDayOfWeek();
           renderStreaks();
         }
       }
@@ -1212,8 +1308,8 @@ function initApp() {
 
   renderHabits();
   renderQuote();
-  // renderStreaks();
   renderDashboarStats();
+  renderCheckInsByDayOfWeek();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
